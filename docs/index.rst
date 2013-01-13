@@ -14,5 +14,7 @@ Issue地址:https://github.com/hit9/PyZh/issues
 
 .. toctree::
     :maxdepth: 1
+    :numbered:
 
     Descriptor-HOW-TO-Guide
+    python-the-dictionary-playbook.rst

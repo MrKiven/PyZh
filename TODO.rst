@@ -1,3 +1,0 @@
-- Python Descriptor How To 翻译
-- Python stackoverflow metaclass
-- stackoverflow python hidden featrues

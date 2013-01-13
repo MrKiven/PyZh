@@ -248,3 +248,7 @@ html_title = u"一起写Python文章，一起看Python文章"
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
 html_theme = 'default_theme'
+
+rst_epilog = """
+.. include:: comment.rst
+"""
