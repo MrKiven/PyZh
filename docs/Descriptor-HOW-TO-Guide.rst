@@ -1,6 +1,6 @@
-================
-Python描述器引导
-================
+====================== 
+Python描述器引导(翻译)
+====================== 
 
 :作者: Raymond Hettinger
 
@@ -170,7 +170,7 @@ Python描述器引导
 
 内建函数 :func:`property` 提供了属性访问的接口，之后的改变需要我们去介入一个函数。
 
-对于一个实例，一个电子表格类可能提供了访问单元格的值的方式: ``Cell('b10').value``. 对这个程序随后的改善需要重新计算每个访问的控制。然而，程序员并不想影响已经写的那些直接访问这个属性的代码。那么来包装这个访问控制的方法就是用property资料描述器::
+例如，一个电子表格类可能提供了访问单元格的值的方式: ``Cell('b10').value``. 对这个程序随后的改善需要重新计算每个访问的控制。然而，程序员并不想影响已经写的那些直接访问这个属性的代码。那么来包装这个访问控制的方法就是用property资料描述器::
 
     class Cell(object):
         . . .
@@ -185,7 +185,7 @@ Python描述器引导
 
 Python的面向对象特征建立于函数环境, 非资料描述器把两者无缝地连接起来。
 
-类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。唯一和一般的函数不同之处是第一个参数为对象实例保留。Python约定，这个参数通常是*self*, 但也可能叫 *this* ，或者其它什么变量名字吧。
+类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。唯一和一般的函数不同之处是第一个参数为对象实例保留。Python约定，这个参数通常是 *self*, 但也可能叫 *this* ，或者其它什么变量名字吧。
 
 为了支持方法调用，函数包含一个 :meth:`__get__` 方法来控制属性访问。这就是说所有的方法都是非资料描述器，它们返回有界还是无界的方法取决于他们是被类调用的还是被实例调用的。用Python来说就是::
 
@@ -195,9 +195,10 @@ Python的面向对象特征建立于函数环境, 非资料描述器把两者无
             "Simulate func_descr_get() in Objects/funcobject.c"
             return types.MethodType(self, obj, objtype)
 
-在Python解释器里面看看描述器是怎么回事:
+在Python解释器里面来看:
 
 ::
+
     >>> class D(object):
          def f(self, x):
               return x
@@ -236,8 +237,79 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
       | classmethod     | f(type(obj), \*args) | f(klass, \*args) |
       +-----------------+----------------------+------------------+
 
-静态方法原样返回那个函数，调用``c.f``或者``C.f``都是等价的，都是在调用``object.__getattribute__(c, "f")`` 或者 ``object.__getattribute__(C, "f")`` 。就是说，这个函数可以同时用类和实例去访问。
+静态方法原样返回那个函数，调用 ``c.f`` 或者 ``C.f`` 都是等价的，都是在调用 ``object.__getattribute__(c, "f")`` 或者 ``object.__getattribute__(C, "f")`` 。就是说，这个函数可以同时用类和实例去访问。
 
 那些不需要 ``self`` 变量做参数的函数适合用做静态方法。
 
+例如, 一个用做统计的包(pkg)可能包含一个类用做实验数据的容器。这个类提供了一般的计算平均数据的方法
+, 平均数，中位数，和其他依赖于这些数据的描述性统计。然而，可能会有些有用的函数和这个统计主题相关，但是并不依赖于这些实验的数据。比如 ``erf(x)`` 是遇到统计工作经常用到的一个函数，但它并不依赖于那些特定的数据。它可以从类或者实例调用: ``s.erf(1.5) --> .9332``  或者 ``Sample.erf(1.5) --> .9332``.
 
+
+既然静态方法是原封不动的被调用，下面的代码看上去就没什么意思了:) ::
+
+    >>> class E(object):
+         def f(x):
+              print x
+         f = staticmethod(f)
+
+    >>> print E.f(3)
+    3
+    >>> print E().f(3)
+    3
+
+利用非资料描述器，我们用Python来实现 :func:`staticmethod` ::
+
+    class StaticMethod(object):
+     "Emulate PyStaticMethod_Type() in Objects/funcobject.c"
+
+     def __init__(self, f):
+          self.f = f
+
+     def __get__(self, obj, objtype=None):
+          return self.f
+
+不像静态方法，类方法需要在调用这个函数之前在参数列表前添上class的引用作为第一个参数。这个格式不管是对实例调用的情形还是类调用的情形都一样:
+
+::
+
+    >>> class E(object):
+         def f(klass, x):
+              return klass.__name__, x
+         f = classmethod(f)
+
+    >>> print E.f(3)
+    ('E', 3)
+    >>> print E().f(3)
+    ('E', 3)
+
+当一个函数不需要相关的数据做参数而之需要一个类的引用的时候，这个特征就显得必要了。一个用途就是用来创建一个类的构造器。在Python 2.3中, :func:`dict.fromkeys` 可以用键的列表来创建一个新的字典。等价的Python实现就是 ::
+
+    class Dict:
+        . . .
+        def fromkeys(klass, iterable, value=None):
+            "Emulate dict_fromkeys() in Objects/dictobject.c"
+            d = klass()
+            for key in iterable:
+                d[key] = value
+            return d
+        fromkeys = classmethod(fromkeys)
+
+这样，一个新的字典就可以这么创建::
+
+    >>> Dict.fromkeys('abracadabra')
+    {'a': None, 'r': None, 'b': None, 'c': None, 'd': None}
+
+用非资料描述器来给出 :func:`classmethod` 的一个Python实现::
+
+    class ClassMethod(object):
+         "Emulate PyClassMethod_Type() in Objects/funcobject.c"
+
+         def __init__(self, f):
+              self.f = f
+
+         def __get__(self, obj, klass=None):
+              if klass is None:
+                   klass = type(obj)
+              def newfunc(*args):
+                   return self.f(klass, *args)
+              return newfunc
