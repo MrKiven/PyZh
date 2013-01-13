@@ -242,3 +242,9 @@ texinfo_documents = [
 #texinfo_show_urls = 'footnote'
 
 html_title = u"一起写Python文章，一起看Python文章"
+
+
+# Activate the theme.
+sys.path.append(os.path.abspath('_themes'))
+html_theme_path = ['_themes']
+html_theme = 'default'
