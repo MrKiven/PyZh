@@ -1,22 +1,18 @@
-.. PyZh documentation master file, created by
-   sphinx-quickstart on Sat Jan 12 22:09:35 2013.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _index:
 
-Welcome to PyZh's documentation!
-================================
+PyZh
+====
 
-Contents:
+一起写文章, 一起看文章
+----------------------
+
+这是个Python技术文章的收集，翻译的Git源的doc.
+
+Github地址:https://github.com/hit9/PyZh
+
+Issue地址:https://github.com/hit9/PyZh/issues
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 1
 
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
+    Descriptor-HOW-TO-Guide

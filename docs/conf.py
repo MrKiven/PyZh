@@ -240,3 +240,5 @@ texinfo_documents = [
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+html_title = u"一起写Python文章，一起看Python文章"
