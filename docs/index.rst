@@ -8,9 +8,9 @@ PyZh
 
 这是个Python技术文章的收集，翻译的Git源的doc.
 
-Github地址:https://github.com/hit9/PyZh
-
-Issue地址:https://github.com/hit9/PyZh/issues
+:Github: https://github.com/hit9/PyZh
+:Issue: https://github.com/hit9/PyZh/issues
+:Authors: https://github.com/hit9/PyZh/graphs/contributors
 
 .. toctree::
     :maxdepth: 1
