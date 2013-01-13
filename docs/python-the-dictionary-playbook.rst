@@ -50,7 +50,7 @@ English,你会说么？::
 
     dct[key] = dct.get(key, 0) + 1
 
-关于 :code:`dct.get(key[, default])` ,如果 ``key`` 存在,返回 ``dct[key]``,否则返回 ``default``
+关于 ``dct.get(key[, default])`` ,如果 ``key`` 存在,返回 ``dct[key]``,否则返回 ``default``
 
 更棒的做法是:
 
