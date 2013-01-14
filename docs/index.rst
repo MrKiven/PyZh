@@ -17,4 +17,5 @@ PyZh
     :numbered:
 
     Descriptor-HOW-TO-Guide
-    python-the-dictionary-playbook.rst
+    python-the-dictionary-playbook
+    the-python-yield-keyword-explained

@@ -11,7 +11,7 @@ Python:字典的剧本(翻译自Python:The Dictionary Playbook)
 
 .. Contents::
 
-1.键的存在性(The "Are You There?")
+键的存在性(The "Are You There?")
 ----------------------------------
 
 不推荐的::
@@ -22,7 +22,7 @@ Python的做法::
 
     key in dct
 
-2.Yoda 测试(The "Yoda Test")
+Yoda 测试(The "Yoda Test")
 -----------------------------
 
 对于那些精通 "Are Your There" 的程序员，还有一个简单的同样也很恼人的行为，不仅仅对于dict而言，它很普遍
@@ -35,7 +35,7 @@ English,你会说么？::
 
     key not in dct
 
-3.无论如何都要取到值(The "Get The Value Anyway")
+无论如何都要取到值(The "Get The Value Anyway")
 ------------------------------------------------
 
 这个是相当流行。你有一个dict和key,并且你想修改key对应的值，比如给它自增1(假如你在数数)。
@@ -85,7 +85,7 @@ English,你会说么？::
     You have entered 3, 2 times!
     You have entered 51, 1 times!
 
-4. 让它发生!(The "Make it Happen")
+让它发生!(The "Make it Happen")
 ----------------------------------
 
 有时你的字典里都是经常修改的对象，你需要初始化一些数据到这个字典，也需要修改其中的一些值。比如说，你在维护一个这样的dict:它的值都是链表。
