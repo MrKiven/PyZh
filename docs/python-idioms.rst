@@ -111,3 +111,108 @@ xrange
 
 异常类
 ------
+
+以前Python中的异常仅仅是简单的字符串。现在不同了，因为类有了很多新的进步。特别是，你可以为异常定义子类，可以选择性的捕捉一些异常或者捕捉它们的超类。异常类一般不复杂.一个典型的异常类看起来是这样的::
+
+    class MyException:
+        def __init__(self, value):
+            self.value = value
+        def __str__(self):
+            return `self.value`
+
+这样使用::
+
+    try:
+        do_stuff()
+        if something_bad_has_happened():
+            raise MyException, "something bad happened"
+    except MyException, e:
+        print "My exception occurred, value: ", e.value
+
+列表生成式
+----------
+
+这是Python中全新的一个特征，来源于函数式编程语言Haskell(很酷的编程语言，顺便告诉你，你应该看看haskell)
+
+其思想是:有时你想要为具有某些特征的对象做一个链表，比如你想要为0到20的偶数做一个链表::
+
+    results = []
+    for i in range(20):
+        if i % 2 == 0:
+            results.append(i)
+
+``results`` 里面就是结果：``[0, 2, 4, 6, 8, 10, 12, 14, 16, 18]`` (没有20,因为range(20)是从0到19).但是同样的事情你可以用列表生成式来做地更简洁些::
+
+   results = [x for x in range(20) if x % 2 == 0]
+
+列表生成式是循环的语法糖.你可以做些更复杂的::
+
+    results = [(x, y)
+               for x in range(10)
+               for y in range(10)
+               if x + y == 5
+               if x > y]
+
+结果 ``results`` 是 ``[(3, 2), (4, 1), (5, 0)]`` . 所以你可以在方括号中写任意多个for和if语句(可能更多，详细参见文档), 你可以用列表生成式来实现快速排序算法::
+
+    def quicksort(lst):
+        if len(lst) == 0:
+            return []
+        else:
+            return quicksort([x for x in lst[1:] if x < lst[0]]) + [lst[0]] + \
+                   quicksort([x for x in lst[1:] if x >= lst[0]])
+
+优美吗? :-)
+
+函数式编程
+----------
+
+Python实现了很多平常只出现在函数式编程语言(像lisp和ML)中的函数和特性。
+
+1. :meth:`map` :meth:`reduce` :meth:`filter` 函数
+
+   :meth:`map` 需要一个函数和几个序列做参数(通常一个)，然后对于序列的每个元素作为函数的参数,所有的返回值产生一个新的序列作为map的返回值。比如你想要把一个字符串链表转换成数字链表::
+
+        lst = ["1", "2", "3", "4", "5"]
+        nums = map(string.atoi, lst)  # [1, 2, 3, 4, 5]
+        
+   (译者注:Py2.7中使用 ``map(int, lst)`` )
+
+   你可以对两个参数的函数使用map::
+
+    def add(x, y):
+        return x + y
+
+    lst1 = [1, 2, 3, 4, 5]
+    lst2 = [6, 7, 8, 9, 10]
+    lst_sum = map(add, lst1, lst2)
+
+    # lst_sum == [7, 9, 11, 13, 15]
+
+   (译者注:这个函数可以有任意多参数，map的后面的参数要跟相应多的序列即可)
+
+   你可以使用 :meth:`reduce` 来把一个序列减少成一个值。第一个参数是函数，这个函数首先作用于序列的第一个和第二个元素，然后用返回的值继续和序列的第三个元素执行这个函数。。。直到剩下一个值，作为reduce的返回值.比如，你可以这么来求0到9的和::
+
+    reduce(lambda x, y: x+y, range(10))
+
+   (译者注:这里为了讲解，一般推荐直接用函数 :meth:`sum` )
+
+   你可以使用 :meth:`filter` 来生成一个序列的子集。比如，获取0到100的所有奇数::
+
+        nums = range(0,101)  # [0, 1, ... 100]
+        
+        def is_odd(x):
+            return x % 2 == 1
+        
+        odd_nums = filter(is_odd, nums)  # [1, 3, 5, ... 99]
+
+2. ``lambda`` 关键字
+
+   lambda 语句声明了一个匿名的函数,很多时候我们在reduce，map等函数中使用的函数只使用了一次。这些函数可以被简洁地声明为匿名函数::
+
+    lst1 = [1, 2, 3, 4, 5]
+    lst2 = [6, 7, 8, 9, 10]
+    lst_elementwise_sum = map(lambda x, y: x + y, lst1, lst2)
+    lst1_sum = reduce(lambda x, y: x + y, lst1)
+    nums = range(101)
+    odd_nums = filter(lambda x: x % 2 == 1, nums)
