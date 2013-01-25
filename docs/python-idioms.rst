@@ -210,9 +210,55 @@ Python实现了很多平常只出现在函数式编程语言(像lisp和ML)中的
 
    lambda 语句声明了一个匿名的函数,很多时候我们在reduce，map等函数中使用的函数只使用了一次。这些函数可以被简洁地声明为匿名函数::
 
-    lst1 = [1, 2, 3, 4, 5]
-    lst2 = [6, 7, 8, 9, 10]
-    lst_elementwise_sum = map(lambda x, y: x + y, lst1, lst2)
-    lst1_sum = reduce(lambda x, y: x + y, lst1)
-    nums = range(101)
-    odd_nums = filter(lambda x: x % 2 == 1, nums)
+       lst1 = [1, 2, 3, 4, 5]
+       lst2 = [6, 7, 8, 9, 10]
+       lst_elementwise_sum = map(lambda x, y: x + y, lst1, lst2)
+       lst1_sum = reduce(lambda x, y: x + y, lst1)
+       nums = range(101)
+       odd_nums = filter(lambda x: x % 2 == 1, nums)
+
+   注意，你仍然可以在lambda函数中使用这个匿名函数外定义的变量。这叫做“词法范围”(lexical scoping),在Python 2.2时官方性地给出了介绍.就像这样::
+
+       a = 1
+       add_a = lambda x: x + a
+       b = add_a(10)  # b == 11
+   
+   lambda中的 ``a`` 是在上一行定义的。如果你认为这是显然的，很好！事实证明很多Python开发者花了很多时间来搞明白它。
+
+   关于lambda你可以参见下 lisp 或 scheme的文档。
+
+3. ``apply`` 函数
+
+   在python中函数是对象，你可以像操作数和字符串一样操作它们(把它们存在变量中等等)，有时你有一个函数对象，你想把程序中生成的一个序列作为参数传给这个函数::
+
+       # Sorry about the long variable names ;-)
+
+       args = function_returning_list_of_numbers()
+       f    = function_returning_a_function_which_operates_on_a_list_of_numbers()
+
+       # You want to do f(arg[0], arg[1], ...) but you don't know how many
+       # arguments are in 'args'.  For this you have to use 'apply':
+
+       result = apply(f, args)
+
+       # A trivial example:
+       args = [1, 1]
+       two = apply(lambda x, y: x + y, args)  # == 2
+
+   译者注:之所以我们不经常用 :meth:`apply` ,一般可以这么做::
+       
+       args = [1, 1]
+       foo = lambda x, y: x+y
+       foo(*args)
+
+生成器和迭代器
+--------------
+
+这是一个高级的(并且很cool)的话题，我们这里没有地方展开说了。如果你关心这个，去看Python文档吧.-_-
+
+PEPS
+----
+
+Python社区非常活跃，"comp.lang.python"小组有很多关于Python应该添加什么新特征的讨论。
+
+所有PEP,见这里:http://www.python.org/dev/peps/
