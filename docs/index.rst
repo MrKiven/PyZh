@@ -19,3 +19,4 @@ PyZh
     Descriptor-HOW-TO-Guide
     python-the-dictionary-playbook
     the-python-yield-keyword-explained
+    python-idioms
