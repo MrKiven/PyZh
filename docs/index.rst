@@ -20,3 +20,4 @@ PyZh
     python-the-dictionary-playbook
     the-python-yield-keyword-explained
     python-idioms
+    GitHub-Repos-For-Pythoners
