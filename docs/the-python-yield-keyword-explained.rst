@@ -276,4 +276,4 @@ itertools包含了很多特殊的迭代方法。是不是曾想过复制一个�
 
 迭代是一个实现可迭代对象(实现的是 :meth:`__iter__` 方法)和迭代器(实现的是 :meth:`__next__` 方法)的过程。可迭代对象是你可以从其获取到一个迭代器的任一对象。迭代器是那些允许你迭代可迭代对象的对象。
 
-更多见这个文章http://effbot.org/zone/python-for-statement.htm
+更多见这个文章 http://effbot.org/zone/python-for-statement.htm

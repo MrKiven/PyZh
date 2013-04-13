@@ -243,10 +243,5 @@ texinfo_documents = [
 
 html_title = u"一起写Python文章，一起看Python文章"
 
-
 # Activate the theme.
 html_theme = 'nature'
-
-rst_epilog = """
-.. include:: comment.rst
-"""
