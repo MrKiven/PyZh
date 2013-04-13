@@ -30,7 +30,7 @@ How-To
 Requirements
 ------------
 
-1. reStructureText语法. 一个cheatSheet_ 
+1. reStructureText语法. 一个 cheatSheet_ 
    
 .. _cheatsheet: https://github.com/ralsina/rst-cheatsheet/blob/master/rst-cheatsheet.rst)
 
