@@ -23,3 +23,4 @@ PyZh
     python-idioms
     GitHub-Repos-For-Pythoners
     improving-your-python-productivity
+    awesome-python-libraries
