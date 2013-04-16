@@ -248,3 +248,5 @@ html_theme = 'nature'
 
 # the feed based url
 feed_base_url = "https://pyzh.readthedocs.org/en/latest/"
+
+feed_filename = 'feed.xml'
