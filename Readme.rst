@@ -26,32 +26,35 @@ Online: https://pyzh.readthedocs.org/en/latest/
 如何开始
 --------
 
-1. clone 这个Repo
-
-  ::
+1. clone 这个Repo::
 
       git clone git@github.com:HIT-ON-Github/PyZh.git
 
-2. 初始化环境
-
-  ::
+2. 初始化环境::
 
       cd PyZh
       virtualenv venv
       pip install -r requirements.pip
 
-3. 编写文章
-
-  ::
+3. 编写文章::
 
       vim docs/xxxxx.rst
 
-4. 编译预览
-
-  ::
+4. 编译预览::
 
       cd docs
       make html
       python -m SimpleHTTPServer
 
   打开 ``http://localhost:8000`` 预览
+
+5. 更新Readthedocs文档:
+
+  push上去到Github,  然后到https://readthedocs.org/projects/pyzh build下即可
+
+RST
+---
+
+RST文档的语法: https://github.com/ralsina/rst-cheatsheet/blob/master/rst-cheatsheet.rst
+
+Example可以看项目中其它文章的源码
