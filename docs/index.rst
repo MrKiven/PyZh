@@ -1,4 +1,4 @@
-:Date: 2013-04-15 22:00:00
+:Date: 2013-01-15
 
 .. _index:
 
@@ -13,6 +13,7 @@ PyZh
 :Github: https://github.com/HIT-ON-Github/PyZh
 :Issue: https://github.com/HIT-ON-Github/PyZh/issues
 :Authors: https://github.com/HIT-ON-Github/PyZh/contributors
+:Feed: https://pyzh.readthedocs.org/en/latest/rss.xml
 
 .. toctree::
     :maxdepth: 1
