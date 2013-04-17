@@ -1,8 +1,8 @@
 :Date: 2013-04-16 21:20:00
 
-==================
-简洁漂亮的Python库
-==================
+======================
+让人耳目一新的Python库
+======================
 
 :作者: hit9
 
@@ -13,7 +13,7 @@
 摘要
 ----
 
-工欲善其事，必先利其器。Python社区高产富饶，有大量的美丽，实用的库, 这里挑选出来一些接口设计简约的库。
+工欲善其事，必先利其器。Python社区高产富饶，有大量的美丽，实用的库, 这里挑选出来一些接口设计简洁的库。
 
 docopt
 ------
@@ -82,8 +82,8 @@ github: https://github.com/codeinthehole/purl
     >>> u.host()
     u'www.google.com'
 
-path
-----
+path.py
+-------
 
 github: https://github.com/jaraco/path.py
 
@@ -120,6 +120,33 @@ https://github.com/coleifer/peewee
     # who wrote posts?
     for post, user in (Post & User).select().fetchall():
         print "Author: %s, PostName: %s" % (user.name, post.name)
+
+schema
+------
+
+https://github.com/halst/schema
+
+同样是docopt的作者编写的，一个数据格式检查库，非常新颖::
+
+    >>> from schema import Schema
+    >>> Schema(int).validate(123)
+    123
+    >>> Schema(int).validate('123')
+    Traceback (most recent call last):
+    ...
+    SchemaError: '123' should be instance of <type 'int'>
+
+fn.py
+-----
+
+https://github.com/kachayev/fn.py
+
+增强Python的函数式编程::
+
+    from fn import _
+
+    print (_ + 2) # "(x1) => (x1 + 2)"
+    print (_ + _ * _) # "(x1, x2, x3) => (x1 + (x2 * x3))"
 
 
 Pocoo小组
