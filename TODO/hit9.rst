@@ -6,4 +6,4 @@
 
 -  http://courses.cms.caltech.edu/cs11/material/python/misc/python_idioms.html
 
-- Python's __dict__ and proxydict
+- Descriptor http://users.rcn.com/python/download/Descriptor.htm
