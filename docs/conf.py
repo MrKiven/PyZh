@@ -243,10 +243,11 @@ texinfo_documents = [
 
 html_title = u"一起写Python文章，一起看Python文章"
 
-# Activate the theme.
-html_theme = 'nature'
-
 # the feed based url
 feed_base_url = "https://pyzh.readthedocs.org/en/latest"
 
 feed_filename = 'rss.xml'
+
+sys.path.append(os.path.abspath('_themes'))
+html_theme_path = ['_themes']
+html_theme = 'pyzh_nature'
