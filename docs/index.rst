@@ -25,3 +25,4 @@ PyZh
     improving-your-python-productivity
     awesome-python-libraries
     python-questions-on-stackoverflow
+    python-hidden-features
