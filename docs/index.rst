@@ -12,6 +12,7 @@ PyZh
 :Issue: https://github.com/HIT-ON-Github/PyZh/issues
 :Authors: https://github.com/HIT-ON-Github/PyZh/contributors
 :Feed: https://pyzh.readthedocs.org/en/latest/rss.xml
+:Theme: https://github.com/huangz1990/der
 
 .. toctree::
     :maxdepth: 1

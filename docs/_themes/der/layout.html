@@ -171,6 +171,8 @@
 
 {%- block footer %}
     <div class="footer">
+<a href="https://github.com/HIT-ON-Github/PyZh"><img style="position: absolute; top: 0; right: 0; border: 0;z-index:12" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub"></a>
+
     {%- if show_copyright %}
       {%- if hasdoc('copyright') %}
         {% trans path=pathto('copyright'), copyright=copyright|e %}&copy; <a href="{{ path }}">Copyright</a> {{ copyright }}.{% endtrans %}

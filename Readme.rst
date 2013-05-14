@@ -23,8 +23,8 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
 - 翻译的文章，需要注明原文链接
 
-如何开始
---------
+请Fork一起编写！
+----------------
 
 1. clone 这个Repo::
 
@@ -46,11 +46,11 @@ Online: https://pyzh.readthedocs.org/en/latest/
       make html
       python -m SimpleHTTPServer
 
-  打开 ``http://localhost:8000`` 预览
+   打开 ``http://localhost:8000`` 预览
 
 5. 更新Readthedocs文档:
 
-  push上去到Github,  然后到https://readthedocs.org/projects/pyzh build下即可
+   push上去到Github,  然后到https://readthedocs.org/projects/pyzh build下即可
 
 RST
 ---
@@ -58,3 +58,9 @@ RST
 RST文档的语法: https://github.com/ralsina/rst-cheatsheet/blob/master/rst-cheatsheet.rst
 
 Example可以看项目中其它文章的源码
+
+
+Thanks
+-------
+
+感谢@huangz1990 同学的sphinx主题 `der` : https://github.com/huangz1990/der
