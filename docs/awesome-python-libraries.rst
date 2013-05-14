@@ -148,6 +148,59 @@ https://github.com/kachayev/fn.py
     print (_ + 2) # "(x1) => (x1 + 2)"
     print (_ + _ * _) # "(x1, x2, x3) => (x1 + (x2 * x3))"
 
+when.py
+--------
+
+https://github.com/dirn/When.py
+
+友好的时间日期库::
+
+    >>> import when
+    >>> when.timezone()
+    'Asia/Shanghai'
+    >>> when.today()
+    datetime.date(2013, 5, 14)
+    >>> when.tomorrow()
+    datetime.date(2013, 5, 15)
+    >>> when.now()
+    datetime.datetime(2013, 5, 14, 21, 2, 23, 78838)
+
+clize
+------
+
+https://github.com/epsy/clize
+
+用 docopt 写程序的使用doc是不是很爽，
+clize是一个类似的库。可以用程序的函数名字来作为使用方法
+
+::
+
+    #!/usr/bin/env python
+    
+    from clize import clize
+    
+    @clize
+    def echo(text, reverse=false):
+        if reverse:
+            text = text[::-1]
+        print(text)
+    if __name__ == '__main__':
+        import sys
+        echo(*sys.argv)
+
+
+而这个小程序就可以这么使用::
+
+    $ ./echo.py --help
+    Usage: ./echo.py [OPTIONS] text
+    
+    Positional arguments:
+      text
+    
+    Options:
+      --reverse
+      -h, --help   Show this help
+
 
 Pocoo小组
 ---------

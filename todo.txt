@@ -1,4 +1,6 @@
--    http://www.jeffknupp.com/blog/2012/10/04/writing-idiomatic-python/
+PyZh
+----
+-     http://www.jeffknupp.com/blog/2012/10/04/writing-idiomatic-python/
 -     http://www.reddit.com/r/Python/comments/wpl1h/what_are_some_little_known_features_in_python/
--     https://github.com/epsy/clize
--     when.py
+- [x] https://github.com/epsy/clize
+- [x] when.py
