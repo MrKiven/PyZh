@@ -27,3 +27,4 @@ PyZh
     awesome-python-libraries
     python-questions-on-stackoverflow
     python-hidden-features
+    single-line-command-with-python
