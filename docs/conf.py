@@ -250,4 +250,4 @@ feed_filename = 'rss.xml'
 
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
-html_theme = 'pyzh_nature'
+html_theme = 'der'
