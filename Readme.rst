@@ -28,7 +28,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
 1. clone 这个Repo::
 
-      git clone git@github.com:HIT-ON-Github/PyZh.git
+      git clone git@github.com:enumerable/PyZh.git
 
 2. 初始化环境::
 
