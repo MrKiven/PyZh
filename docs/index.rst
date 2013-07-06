@@ -28,3 +28,4 @@ PyZh
     python-questions-on-stackoverflow
     python-hidden-features
     single-line-command-with-python
+    python-magic-methods-guide
