@@ -8,11 +8,10 @@ PyZh
 
 这是个Python技术文章的收集，翻译的Git源的doc.
 
-:Github: https://github.com/enumerable/PyZh
-:Issue: https://github.com/enumerable/PyZh/issues
-:Authors: https://github.com/enumerable/PyZh/contributors
+:Github: https://github.com/hit9/PyZh
+:Issue: https://github.com/hit9/PyZh/issues
+:Authors: https://github.com/hit9/PyZh/contributors
 :Feed: https://pyzh.readthedocs.org/en/latest/rss.xml
-:Theme: https://github.com/huangz1990/der
 
 .. toctree::
     :maxdepth: 1
