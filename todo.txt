@@ -1,6 +1,6 @@
-PyZh
-----
--     http://www.jeffknupp.com/blog/2012/10/04/writing-idiomatic-python/
+- [ ] http://www.jeffknupp.com/blog/2012/10/04/writing-idiomatic-python/
 - [x] http://www.reddit.com/r/Python/comments/wpl1h/what_are_some_little_known_features_in_python/
 - [x] https://github.com/epsy/clize
 - [x] when.py
+- [ ] Websocket的Python解决方案(python realtime)
+- [ ] Python异步方案总结
