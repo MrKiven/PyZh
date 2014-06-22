@@ -76,7 +76,7 @@
     if instance.equals(other_instance):
         # do something
 
-你当然可以在Python也这么做，但是没必要这么做。运用魔法方法的魔力，我们可以定义方法 `__eq__` ::
+你当然可以在Python也这么做，但是这样做让代码变得冗长而混乱。不同的类库可能对同一种比较操作采用不同的方法名称，这让使用者需要做很多没有必要的工作。运用魔法方法的魔力，我们可以定义方法 `__eq__` ::
 
     if instance == other_instance:
         #do something
@@ -85,5 +85,66 @@
 
 比较操作符
 ''''''''''
+
+Python包含了一系列的魔法方法，用于实现对象之间直接比较，而不需要采用方法调用。同样也可以重载Python默认的比较方法，改变它们的行为。下面是这些方法的列表：
+
+- `__cmp__(self, other)`
+
+  `__cmp__` 是所有比较魔法方法中最基础的一个，它实际上定义了所有比较操作符的行为（<,==,!=,等等），但是它可能不能按照你需要的方式工作（例如，判断一个实例和另一个实例是否相等采用一套标准，而与判断一个实例是否大于另一实例采用另一套）。 `__cmp__` 应该在 `self < other` 时返回一个负整数，在 `self == other` 时返回0，在 `self > other` 时返回正整数。最好只定义你所需要的比较形式，而不是一次定义全部。 如果你需要实现所有的比较形式，而且它们的判断标准类似，那么 `__cmp__` 是一个很好的方法，可以减少代码重复，让代码更简洁。
+
+
+- `__eq__`(self, other)`
+
+  定义等于操作符(==)的行为。
+
+- `__ne__(self, other)`
+
+  定义不等于操作符(!=)的行为。
+
+- `__lt__(self, other)`
+
+  定义小于操作符(<)的行为。
+
+- `__gt__(self, other)`
+
+  定义大于操作符(>)的行为。
+
+- `__le__(self, other)`
+
+  定义小于等于操作符(<)的行为。
+
+- `__ge__(self, other)`
+
+  定义大于等于操作符(>)的行为。
+
+举个例子，假如我们想用一个类来存储单词。我们可能想按照字典序（字母顺序）来比较单词，字符串的默认比较行为就是这样。我们可能也想按照其他规则来比较字符串，像是长度，或者音节的数量。在这个例子中，我们使用长度作为比较标准，下面是一种实现::
+    
+    class Word(str):
+        '''Class for words, defining comparison based on word length.'''
+
+        def __new__(cls, word):
+            # Note that we have to use __new__. This is because str is an immutable
+            # type, so we have to initialize it early (at creation)
+            if ' ' in word:
+                print "Value contains spaces. Truncating to first space."
+                word = word[:word.index(' ')] # Word is now all chars before first space
+            return str.__new__(cls, word)
+
+        def __gt__(self, other):
+            return len(self) > len(other)
+        def __lt__(self, other):
+            return len(self) < len(other)
+        def __ge__(self, other):
+            return len(self) >= len(other)
+        def __le__(self, other):
+            return len(self) <= len(other)
+    
+ 
+现在我们可以创建两个 `Word` 对象（ `Word('foo')` 和 `Word('bar')`)然后根据长度来比较它们。注意我们没有定义 `__eq__` 和 `__ne__` ，这是因为有时候它们会导致奇怪的结果（很明显， `Word('foo') == Word('bar')` 得到的结果会是true）。根据长度测试是否相等毫无意义，所以我们使用 `str` 的实现来比较相等。
+
+从上面可以看到，不需要实现所有的比较魔法方法，就可以使用丰富的比较操作。标准库还在 `functools` 模块中提供了一个类装饰器，只要我们定义 `__eq__` 和另外一个操作符（ `__gt__`, `__lt__` 等），它就可以帮我们实现比较方法。这个特性只在 Python 2.7 中可用。当它可用时，它能帮助我们节省大量的时间和精力。要使用它，只需要它 `@total_ordering` 放在类的定义之上就可以了
+
+数值魔法方法
+'''''''''''
 
 未完待续..

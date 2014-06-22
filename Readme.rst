@@ -28,7 +28,9 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
 1. 初始化环境::
 
+      git clone https://github.com/hit9/PyZh
       cd PyZh
+      git submodule init & git submodule update
       virtualenv venv
       pip install -r requirements.pip
 
@@ -40,6 +42,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
       cd docs
       make html
+      cd _build
       python -m SimpleHTTPServer
 
    打开 ``http://localhost:8000`` 预览
