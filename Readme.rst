@@ -42,7 +42,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
       cd docs
       make html
-      cd _build
+      cd _build/html
       python -m SimpleHTTPServer
 
    打开 ``http://localhost:8000`` 预览
