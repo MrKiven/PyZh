@@ -32,6 +32,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
       cd PyZh
       git submodule init & git submodule update
       virtualenv venv
+      source <env-path>/bin/activate 
       pip install -r requirements.pip
 
 2. 编写文章::
