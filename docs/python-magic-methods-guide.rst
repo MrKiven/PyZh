@@ -56,10 +56,10 @@
     from os.path import join
     
     class FileObject:
-        '''Wrapper for file objects to make sure the file gets closed on deletion.'''
+        '''文件对象的装饰类，用来保证文件被删除时能够正确关闭。'''
     
         def __init__(self, filepath='~', filename='sample.txt'):
-            # open a file filename in filepath in read and write mode
+            # 使用读写模式打开filepath中的filename文件
             self.file = open(join(filepath, filename), 'r+')
     
         def __del__(self):
@@ -70,7 +70,7 @@
 操作符
 ------
 
-使用Python魔法方法的一个巨大优势就是可以构建一个拥有Python内置类型行为的对象。这意味着你可以避免使用非标准的、丑陋的方式来表达简易的操作。
+使用Python魔法方法的一个巨大优势就是可以构建一个拥有Python内置类型行为的对象。这意味着你可以避免使用非标准的、丑陋的方式来表达简单的操作。
 在一些语言中，这样做很常见::
 
     if instance.equals(other_instance):
@@ -120,14 +120,15 @@ Python包含了一系列的魔法方法，用于实现对象之间直接比较�
 举个例子，假如我们想用一个类来存储单词。我们可能想按照字典序（字母顺序）来比较单词，字符串的默认比较行为就是这样。我们可能也想按照其他规则来比较字符串，像是长度，或者音节的数量。在这个例子中，我们使用长度作为比较标准，下面是一种实现::
     
     class Word(str):
-        '''Class for words, defining comparison based on word length.'''
+        '''单词类，按照单词长度来定义比较行为'''
 
         def __new__(cls, word):
-            # Note that we have to use __new__. This is because str is an immutable
-            # type, so we have to initialize it early (at creation)
+            # 注意，我们只能使用 __new__ ，因为str是不可变类型
+            # 所以我们必须提前初始化它（在实例创建时）
             if ' ' in word:
                 print "Value contains spaces. Truncating to first space."
-                word = word[:word.index(' ')] # Word is now all chars before first space
+                word = word[:word.index(' ')] 
+                # Word现在包含第一个空格前的所有字母
             return str.__new__(cls, word)
 
         def __gt__(self, other):
@@ -325,7 +326,7 @@ Python包含了一系列的魔法方法，用于实现对象之间直接比较�
 增强赋值运算符
 ===============
 
-Python同样提供了大量的魔法方法，可以用来自定义增强赋值操作的行为。或许你已经了解增强赋值了，它融合了“常见”的操作符和赋值操作，如果你还是没听明白，看下面的例子::
+Python同样提供了大量的魔法方法，可以用来自定义增强赋值操作的行为。或许你已经了解增强赋值，它融合了“常见”的操作符和赋值操作，如果你还是没听明白，看下面的例子::
 
     x = 5
     x += 1 # in other words x = x + 1
@@ -425,6 +426,63 @@ Python也有一系列的魔法方法用于实现类似 `float()` 的内建类型
 - `__coerce__(self)`
   
   该方法用于实现混合模式算数运算，如果不能进行类型转换， `__coerce__` 应该返回 `None` 。反之，它应该返回一个二元组 `self` 和 `other` ，这两者均已被转换成相同的类型。
+
+
+类的表示
+---------
+
+使用字符串来表示类是一个相当有用的特性。在Python中有一些内建方法可以返回类的表示，相对应的，也有一系列魔法方法可以用来自定义在使用这些内建函数时类的行为。
+
+- `__str__(self)`
+
+定义对类的实例调用 `str()` 时的行为。
+
+- `__repr__(self)`
+
+定义对类的实例调用 `repr()` 时的行为。 `str()` 和 `repr()` 最主要的差别在于“目标用户”。 `repr()` 的作用是产生机器可读的输出（大部分情况下，其输出可以作为有效的Python代码），而 `str()` 则产生人类可读的输出。
+
+- `__unicode__(self)`
+
+定义对类的实例调用 `unicode()` 时的行为。 `unicode()` 和 `str()` 很像，只是它返回unicode字符串。注意，如果调用者试图调用 `str()` 而你的类只实现了 `__unicode__()` ，那么类将不能正常工作。所有你应该总是定义 `__str__()` ，以防有些人没有闲情雅致来使用unicode。
+
+- `__format__(self)`
+
+定义当类的实例用于新式字符串格式化时的行为，例如， `"Hello, 0:abc!".format(a)` 会导致调用 `a.__format__("abc")` 。当定义你自己的数值类型或字符串类型时，你可能想提供某些特殊的格式化选项，这种情况下这个魔法方法会非常有用。
+
+- `__hash__(self)`
+
+定义对类的实例调用 `hash()` 时的行为。它必须返回一个整数，其结果会被用于字典中键的快速比较。注意到一点，实现这个魔法方法通常也需要实现 `__eq__` ，并且遵守如下的规则： `a == b` 意味着 `hash(a) == hash(b)`。
+
+- `__nonzero__(self)`
+
+定义对类的实例调用 `bool()` 时的行为，根据你自己对类的设计，针对不同的实例，这个魔法方法应该相应地返回True或False。
+
+- `__dir__(self)`
+
+定义对类的实例调用 `dir()` 时的行为，这个方法应该向调用者返回一个属性列表。一般来说，没必要自己实现 `__dir__` 。但是如果你重定义了 `__getattr__` 或者 `__getattribute__`（下个部分会介绍），乃至使用动态生成的属性，以实现类的交互式使用，那么这个魔法方法是必不可少的。
+
+
+
+到这里，我们基本上已经结束了魔法方法指南中无聊并且例子匮乏的部分。既然我们已经介绍了较为基础的魔法方法，是时候涉及更高级的内容了。
+
+
+
+访问控制
+---------
+
+很多从其他语言转向Python的人都抱怨Python的类缺少真正意义上的封装（即没办法定义私有属性然后使用公有的getter和setter）。然而事实并非如此。实际上Python不是通过显式定义的字段和方法修改器，而是通过魔法方法实现了一系列的封装。
+
+- `__getattr__(self, name)`
+
+当用户试图访问一个根本不存在（或者暂时不存在）的属性时，你可以通过这个魔法方法来定义类的行为。这个可以用于捕捉错误的拼写并且给出指引，使用废弃属性时给出警告（如果你愿意，仍然可以计算并且返回该属性），以及灵活地处理AttributeError。只有当试图访问不存在的属性时它才会被调用，所以这不能算是一个真正的封装的办法。
+
+- `__setattr__(self, name, value)`
+
+和 `__getattr__` 不同， `__setattr__` 可以用于真正意义上的封装。它允许你自定义某个属性的赋值行为，不管这个属性存在与否，也就是说你可以对任意属性的任何变化都定义自己的规则。然后，一定要小心使用 `__setattr__` ，这个列表最后的例子中会有所展示。
+
+- `__delattr__(self, name)`
+
+这个魔法方法和 `__setattr__` 几乎相同，只不过它是用于处理删除属性时的行为。和 `_setattr__` 一样，使用它时也需要多加小心，防止产生无限递归（在 `__delattr__` 的实现中调用 `del self.name` 会导致无限递归）。
 
 
 未完待续..
