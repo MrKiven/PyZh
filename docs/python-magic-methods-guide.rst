@@ -174,7 +174,7 @@ Python包含了一系列的魔法方法，用于实现对象之间直接比较�
   
 - `__round__(self， n)` 
 
-  实现内建函数 `round()` ，n 是近似小数点的数目。
+  实现内建函数 `round()` ，n 是近似小数点的位数。
 
 - `__floor__(self)`
 
@@ -484,5 +484,59 @@ Python也有一系列的魔法方法用于实现类似 `float()` 的内建类型
 
 这个魔法方法和 `__setattr__` 几乎相同，只不过它是用于处理删除属性时的行为。和 `_setattr__` 一样，使用它时也需要多加小心，防止产生无限递归（在 `__delattr__` 的实现中调用 `del self.name` 会导致无限递归）。
 
+- `__getattribute__(self, name)`
+
+` __getattribute__` 看起来和上面那些方法很合得来，但是最好不要使用它。 `__getattribute__` 只能用于新式类。在最新版的Python中所有的类都是新式类，在老版Python中你可以通过继承 `object` 来创建新式类。 `__getattribute__` 允许你自定义属性被访问时的行为，它也同样可能遇到无限递归问题（通过调用基类的 `__getattribute__` 来避免）。 `__getattribute__` 基本上可以替代 `__getattr__` 。只有当它被实现，并且显式地被调用，或者产生 `AttributeError` 时它才被使用。 这个魔法方法可以被使用（毕竟，选择权在你自己），我不推荐你使用它，因为它的使用范围相对有限（通常我们想要在赋值时进行特殊操作，而不是取值时），而且实现这个方法很容易出现Bug。
+
+
+自定义这些控制属性访问的魔法方法很容易导致问题，考虑下面这个例子::
+
+    def __setattr__(self, name. value):
+        self.name = value
+        # 因为每次属性幅值都要调用 __setattr__()，所以这里的实现会导致递归
+        # 这里的调用实际上是 self.__setattr('name', value)。因为这个方法一直
+        # 在调用自己，因此递归将持续进行，直到程序崩溃
+        
+    def __setattr__(self, name, value):
+    	self.__dict__[name] = value # 使用 __dict__ 进行赋值
+    	# 定义自定义行为
+    	
+再次重申，Python的魔法方法十分强大，能力越强责任越大，了解如何正确的使用魔法方法更加重要。
+
+到这里，我们对Python中自定义属性存取控制有了什么样的印象？它并不适合轻度的使用。实际上，它有些过分强大，而且违反直觉。然而它之所以存在，是因为一个更大的原则：Python不指望让杜绝坏事发生，而是想办法让做坏事变得困难。自由是至高无上的权利，你真的可以随心所欲。下面的例子展示了实际应用中某些特殊的属性访问方法（注意我们之所以使用 `super` 是因为不是所有的类都有 `__dict__` 属性）::
+
+    class AccessCounter(object):
+    	''' 一个包含了一个值并且实现了访问计数器的类
+    	每次值的变化都会导致计数器自增'''
+    	
+    	def __init__(self, val):
+    		super(AccessCounter, self).__setattr__('counter', 0)
+    		super(AccessCounter, self).__setattr__('value', val)
+    		
+    	def __setattr__(self, name, value):
+    		if name == 'value':
+    			super(AccessCounter, self).__setattr_('counter', self.counter + 1)
+    	    # 使计数器自增变成不可避免
+    	    # 如果你想阻止其他属性的赋值行为
+    	    # 产生 AttributeError(name) 就可以了
+    	    super(AccessCounter, self).__setattr__(name, value)
+    	     
+    	def __delattr__(self, name):
+    		if name == 'value':
+    			super(AccessCounter, self).__setattr('counter', self.counter + 1)
+    			super(AccessCounter, self).__delattr(name)
+    			
+
+自定义序列
+-----------
+
+有许多办法可以让你的Python类表现得像是内建序列类型（词典，元组，列表，字符串等）。这些魔法方式是目前为止我最喜欢的。它们给了你难以置信的控制能力，可以让你的类与一系列的全局函数完美结合。在了解激动人心的内容之前，首先你需要掌握一些预备知识。
+
+预备知识
+'''''''''
+
+既然讲到创建自己的序列类型，就不得不说一说协议了。协议类似某些语言中的接口，里面包含的是一些必须实现的方法。在Python中，协议完全是非正式的，也不需要显式的声明，事实上，它们更像是一种参考标准。
+
+为什么我们要讲协议？因为在Python中实现自定义容器类型需要用到一些协议。首先，不可变容器类型有如下协议：想实现一个不可变容器，你需要定义 `__len__` 和 `__getitem__` (后面会具体说明）。可变容器的协议除了上面提到的两个方法之外，还需要定义 `__setitem__` 和 `__delitem__` 。最后，如果你想让你的对象可以迭代，你需要定义 `__iter__` ，这个方法返回一个迭代器。迭代器必须遵守迭代器协议，需要定义 `__iter__` （返回它自己）和 `next` 方法。
 
 未完待续..
