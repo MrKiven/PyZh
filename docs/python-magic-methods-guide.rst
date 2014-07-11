@@ -451,7 +451,7 @@ Python也有一系列的魔法方法用于实现类似 `float()` 的内建类型
 
 - `__hash__(self)`
 
-定义对类的实例调用 `hash()` 时的行为。它必须返回一个整数，其结果会被用于字典中键的快速比较。注意到一点，实现这个魔法方法通常也需要实现 `__eq__` ，并且遵守如下的规则： `a == b` 意味着 `hash(a) == hash(b)`。
+定义对类的实例调用 `hash()` 时的行为。它必须返回一个整数，其结果会被用于字典中键的快速比较。同时注意一点，实现这个魔法方法通常也需要实现 `__eq__` ，并且遵守如下的规则： `a == b` 意味着 `hash(a) == hash(b)`。
 
 - `__nonzero__(self)`
 
@@ -632,6 +632,185 @@ Python也有一系列的魔法方法用于实现类似 `float()` 的内建类型
 
 
 就是这些，一个（微不足道的）有用的例子，向你展示了如何实现自己的序列。当然啦，自定义序列有更大的用处，而且绝大部分都在标准库中实现了（Python是自带电池的，记得吗？），像 `Counter` , `OrderedDict` 和 `NamedTuple` 。
+
+反射
+------
+
+你可以通过定义魔法方法来控制用于反射的内建函数 `isinstance` 和 `issubclass` 的行为。下面是对应的魔法方法：
+
+- `__instancecheck__(self, instance)`
+
+    检查一个实例是否是你定义的类的一个实例（例如 `isinstance(instance, class)` ）。
+    
+- `__subclasscheck__(self, subclass)`
+
+    检查一个类是否是你定义的类的子类（例如 `issubclass(subclass, class)` ）。
+    
+
+这几个魔法方法的适用范围看起来有些窄，事实也正是如此。我不会在反射魔法方法上花费太多时间，因为相比其他魔法方法它们显得不是很重要。但是它们展示了在Python中进行面向对象编程（或者总体上使用Python进行编程）时很重要的一点：不管做什么事情，都会有一个简单方法，不管它常用不常用。这些魔法方法可能看起来没那么有用，但是当你真正需要用到它们的时候，你会感到很幸运，因为它们还在那儿（也因为你阅读了这本指南！）   
+    
+    
+抽象基类
+---------
+
+请参考 http://docs.python.org/2/library/abc.html.
+
+
+可调用的对象
+--------------
+
+你可能已经知道了，在Python中，函数是一等的对象。这意味着它们可以像其他任何对象一样被传递到函数和方法中，这是一个十分强大的特性。
+
+Python中一个特殊的魔法方法允许你自己类的对象表现得像是函数，然后你就可以“调用”它们，把它们传递到使用函数做参数的函数中，等等等等。这是另一个强大而且方便的特性，让使用Python编程变得更加幸福。
+
+- `__call__(self, [args...])`
+
+	允许类的一个实例像函数那样被调用。本质上这代表了 `x()` 和 `x.__call__()` 是相同的。注意 `__call__` 可以有多个参数，这代表你可以像定义其他任何函数一样，定义 `__call__` ，喜欢用多少参数就用多少。
+	
+	`__call__` 在某些需要经常改变状态的类的实例中显得特别有用。“调用”这个实例来改变它的状态，是一种更加符合直觉，也更加优雅的方法。一个表示平面上实体的类是一个不错的例子::
+	
+	class Entity:
+		'''表示一个实体的类，调用它的实例
+		可以更新实体的位置'''
+		
+		def __init__(self, size, x, y):
+			self.x, self.y = x, y
+			self.size = size
+			
+		def __call__(self, x, y):
+			'''改变实体的位置'''
+			self.x, self.y = x, y
+			
+
+上下文管理器
+-------------
+
+在Python 2.5中引入了一个全新的关键词，随之而来的是一种新的代码复用方法—— `with` 声明。上下文管理的概念在Python中并不是全新引入的（之前它作为标准库的一部分实现），直到PEP 343被接受，它才成为一种一级的语言结构。可能你已经见过这种写法了::
+    
+    with open('foo.txt') as bar:
+    	# 使用bar进行某些操作
+    	
+
+当对象使用 `with` 声明创建时，上下文管理器允许类做一些设置和清理工作。上下文管理器的行为由下面两个魔法方法所定义：
+
+- `__enter__(self)
+
+	定义使用 `with` 声明创建的语句块最开始上下文管理器应该做些什么。注意 `__enter__` 的返回值会赋给 `with` 声明的目标，也就是 `as` 之后的东西。
+	
+- `__exit__(self, exception_type, exception_value, traceback)
+
+	定义当 `with` 声明语句块执行完毕（或终止）时上下文管理器的行为。它可以用来处理异常，进行清理，或者做其他应该在语句块结束之后立刻执行的工作。如果语句块顺利执行， `exception_type` , `exception_value` 和 `traceback` 会是 `None` 。否则，你可以选择处理这个异常或者让用户来处理。如果你想处理异常，确保 `__exit__` 在完成工作之后返回 `True` 。如果你不想处理异常，那就让它发生吧。
+	
+
+
+对一些具有良好定义的且通用的设置和清理行为的类，`__enter__` 和 `__exit__`  会显得特别有用。你也可以使用这几个方法来创建通用的上下文管理器，用来包装其他对象。下面是一个例子::
+
+	class Closer:
+	    '''一个上下文管理器，可以在with语句中
+	    使用close()自动关闭对象'''
+	    
+	    def __init__(self, obj):
+	    	self.obj = obj
+	    	
+	    def __enter__(self, obj):
+	    	return self.obj # 绑定到目标
+	    	
+	    def __exit__(self, exception_type, exception_value, traceback):
+	    	try:
+	    		self.obj.close()
+	    	except AttributeError: # obj不是可关闭的
+	    		print 'Not closable.'
+	    		return True # 成功地处理了异常
+	    		
+
+这是一个 `Closer` 在实际使用中的例子，使用一个FTP连接来演示（一个可关闭的socket)::
+
+    >>> from magicmethods import Closer
+    >>> from ftplib import FTP
+    >>> with Closer(FTP('ftp.somesite.com')) as conn:
+    ...		conn.dir()
+    ...
+    # 为了简单，省略了某些输出
+    >>> conn.dir()
+    # 很长的 AttributeError 信息，不能使用一个已关闭的连接
+    >>> with Closer(int(5)) as i:
+    ...		i += 1
+    ...
+    Not closable.
+    >>> i
+    6
+    
+看到我们的包装器是如何同时优雅地处理正确和不正确的调用了吗？这就是上下文管理器和魔法方法的力量。Python标准库包含一个 `contextlib` 模块，里面有一个上下文管理器 `contextlib.closing()` 基本上和我们的包装器完成的是同样的事情（但是没有包含任何当对象没有close()方法时的处理）。
+
+创建描述符对象
+---------------
+
+描述符是一个类，当使用取值，赋值和删除 时它可以改变其他对象。描述符不是用来单独使用的，它们需要被一个拥有者类所包含。描述符可以用来创建面向对象数据库，以及创建某些属性之间互相依赖的类。描述符在表现具有不同单位的属性，或者需要计算的属性时显得特别有用（例如表现一个坐标系中的点的类，其中的距离原点的距离这种属性）。
+
+要想成为一个描述符，一个类必须具有实现 `__get__` , `__set__` 和 `__delete__` 三个方法中至少一个。
+
+让我们一起来看一看这些魔法方法：
+
+- `__get__(self, instance, owner)`
+
+    定义当试图取出描述符的值时的行为。 `instance` 是拥有者类的实例， `owner` 是拥有者类本身。
+
+- `__set__(self, instance, owner)`
+
+    定义当描述符的值改变时的行为。 `instance` 是拥有者类的实例， `value` 是要赋给描述符的值。
+
+- `__delete__(self, instance, owner)`
+
+    定义当描述符的值被删除时的行为。 `instance` 是拥有者类的实例
+
+
+现在，来看一个描述符的有效应用：单位转换::
+  
+    class Meter(object):
+        '''米的描述符。'''
+
+        def __init__(self, value=0.0):
+            self.value = float(value)
+        def __get__(self, instance, owner):
+            return self.value
+        def __set__(self, instance, owner):
+        	self.value = float(value)
+        	
+    class Foot(object):
+    	'''英尺的描述符。'''
+    	
+    	def __get(self, instance, owner):
+    		return instance.meter * 3.2808
+    	def __set(self, instance, value):
+    		instance.meter = float(value) / 3.2808
+    		
+    class Distance(object):
+    	'''用于描述距离的类，包含英尺和米两个描述符。'''
+    	meter = Meter()
+    	foot = Foot()
+    	
+    	
+拷贝
+-----
+
+有些时候，特别是处理可变对象时，你可能想拷贝一个对象，改变这个对象而不影响原有的对象。这时就需要用到Python的 `copy` 模块了。然而（幸运的是），Python模块并不具有感知能力，
+因此我们不用担心某天基于Linux的机器人崛起。但是我们的确需要告诉Python如何有效率地拷贝对象。
+
+- `__copy__(self)` 
+
+    定义对类的实例使用 `copy.copy()` 时的行为。 `copy.copy()` 返回一个对象的浅拷贝，这意味着拷贝出的实例是全新的，然而里面的数据全都是引用的。也就是说，对象本身是拷贝的，但是它的数据还是引用的（所以浅拷贝中的数据更改会影响原对象）。
+    
+- `__deepcopy__(self, memodict=)
+
+	定义对类的实例使用 `copy.deepcopy()` 时的行为。 `copy.deepcopy()` 返回一个对象的深拷贝，这个对象和它的数据全都被拷贝了一份。 `memodict` 是一个先前拷贝对象的缓存，它优化了拷贝过程，而且可以防止拷贝递归数据结构时产生无限递归。当你想深拷贝一个单独的属性时，在那个属性上调用 `copy.deepcopy()` ，使用 `memodict` 作为第一个参数。
+	
+这些魔法方法有什么用武之地呢？像往常一样，当你需要比默认行为更加精确的控制时。例如，如果你想拷贝一个对象，其中存储了一个字典作为缓存（可能会很大），拷贝缓存可能是没有意义的。如果这个缓存可以在内存中被不同实例共享，那么它就应该被共享。
+
+Pickling
+---------
+
+如果你和其他的Python爱好者共事过，很可能你已经听说过Pickling了。Pickling是Python的数据结构的
+
 
 
 
