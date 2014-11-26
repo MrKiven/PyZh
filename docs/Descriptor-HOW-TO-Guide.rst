@@ -90,7 +90,7 @@ Python描述器引导(翻译)
 描述器例子
 ----------
 
-下面的代码中的类中定义了资料描述器，每次 ``get`` 和 ``set`` 都会打印一条消息。重写 :meth:`__getattribute__` 是另一个可以使所有属性拥有这个行为的方法。但是，描述器对于只是几个属性的时候是很有用的。
+下面的代码中定义了一个资料描述器，每次 ``get`` 和 ``set`` 都会打印一条消息。重写 :meth:`__getattribute__` 是另一个可以使所有属性拥有这个行为的方法。但是，描述器在监视特定属性的时候是很有用的。
 
 ::
 
@@ -127,16 +127,16 @@ Python描述器引导(翻译)
     >>> m.y
     5
 
-这个协定非常简单，并且提供了令人激动的可能。一些用例用途太多了以致于它们被打包成独立的方法。像属性(property), 方法(bound和unbound method), 静态方法和类方法都是基于描述器协定的
+这个协定非常简单，并且提供了令人激动的可能。一些用途实在是太普遍以致于它们被打包成独立的函数。像属性(property), 方法(bound和unbound method), 静态方法和类方法都是基于描述器协定的。
 
 属性(properties)
 ----------------
 
-调用 :func:`property` 是建立访问一个属性的描述器的简洁的方式。这个函数的原型::
+调用 :func:`property` 是建立资料描述器的一种简洁方式，从而可以在访问属性时触发相应的方法调用。这个函数的原型::
 
     property(fget=None, fset=None, fdel=None, doc=None) -> property attribute
 
-下面展示了一个典型的定义一个良好管理的属性 ``x`` 的情形::
+下面展示了一个典型应用：定义一个托管属性(Managed Attribute) ``x`` ::
 
     class C(object):
         def getx(self): return self.__x
@@ -172,9 +172,18 @@ Python描述器引导(翻译)
                 raise AttributeError, "can't delete attribute"
             self.fdel(obj)
 
-内建函数 :func:`property` 提供了属性访问的接口，之后的改变需要我们去介入一个函数。
+        def getter(self, fget):
+            return type(self)(fget, self.fset, self.fdel, self.__doc__)
 
-例如，一个电子表格类可能提供了访问单元格的值的方式: ``Cell('b10').value``. 对这个程序随后的改善需要重新计算每个访问的控制。然而，程序员并不想影响已经写的那些直接访问这个属性的代码。那么来包装这个访问控制的方法就是用property资料描述器::
+        def setter(self, fset):
+            return type(self)(self.fget, fset, self.fdel, self.__doc__)
+
+        def deleter(self, fdel):
+            return type(self)(self.fget, self.fset, fdel, self.__doc__)
+
+当用户接口已经被授权访问属性之后，需求发生一些变化，属性需要进一步处理才能返回给用户。这时 :func:`property` 能够提供很大帮助。
+
+例如，一个电子表格类提供了访问单元格的方式: ``Cell('b10').value``. 之后，对这个程序的改善要求在每次访问单元格时重新计算单元格的值。然而，程序员并不想影响那些客户端中直接访问属性的代码。那么解决方案是将属性访问包装在一个属性资料描述器中::
 
     class Cell(object):
         . . .
@@ -187,11 +196,11 @@ Python描述器引导(翻译)
 函数和方法
 ----------
 
-Python的面向对象特征建立于函数环境, 非资料描述器把两者无缝地连接起来。
+Python的面向对象特征是建立在基于函数的环境之上的。非资料描述器把两者无缝地连接起来。
 
-类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。唯一和一般的函数不同之处是第一个参数为对象实例保留。Python约定，这个参数通常是 *self*, 但也可能叫 *this* ，或者其它什么变量名字吧。
+类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。这和创建函数是一样的。唯一的不同之处是类方法的第一个参数用来表示对象实例。Python约定，这个参数通常是 *self*, 但也可以叫 *this* 或者其它任何名字。
 
-为了支持方法调用，函数包含一个 :meth:`__get__` 方法来控制属性访问。这就是说所有的方法都是非资料描述器，它们返回有界还是无界的方法取决于他们是被类调用的还是被实例调用的。用Python来说就是::
+为了支持方法调用，函数包含一个 :meth:`__get__` 方法以便在属性访问时绑定方法。这就是说所有的函数都是非资料描述器，它们返回绑定(bound)还是非绑定(unbound)的方法取决于他们是被实例调用还是被类调用。用Python代码来描述就是::
 
     class Function(object):
         . . .
@@ -199,7 +208,7 @@ Python的面向对象特征建立于函数环境, 非资料描述器把两者无
             "Simulate func_descr_get() in Objects/funcobject.c"
             return types.MethodType(self, obj, objtype)
 
-在Python解释器里面来看:
+运行解释器来展示实际情况下函数描述器是如何工作的：
 
 ::
 
@@ -215,11 +224,11 @@ Python的面向对象特征建立于函数环境, 非资料描述器把两者无
     >>> d.f             # 从实例来访问，返回bound method
     <bound method D.f of <__main__.D object at 0x00B18C90>>
 
-从输出来看，bound method 和unbound method是两个不同的类型.然而它们是这么实现的：在文件  
+从输出来看，绑定方法和非绑定方法是两个不同的类型。它们是在文件  
 Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobject.c?view=markup)  
-中用C实现的 :c:type:`PyMethod_Type`  是一个对象，但是根据 :attr:`im_self` 是否是 *NULL* (在C中等价于 *None* ) 分成两个不同的陈述。
+中用C实现的， :c:type:`PyMethod_Type`  是一个对象，但是根据 :attr:`im_self` 是否是 *NULL* (在C中等价于 *None* ) 而表现不同。
 
-同样，调用方法的结果依赖于 :attr:`im_self` 是否设置。如果设置了(意味着bound), 原来的函数(保存在 :attr:`im_func` 中)被调用，并且第一个参数设置成实例。如果unbound, 所有参数不变地传给那个函数。真实函数 :func:`instancemethod_call()` 的C的实现比这个稍微复杂些而已(有一些类型检查)。
+同样，一个方法的表现依赖于 :attr:`im_self` 。如果设置了(意味着bound), 原来的函数(保存在 :attr:`im_func` 中)被调用，并且第一个参数设置成实例。如果unbound, 所有参数原封不动地传给原来的函数。函数 :func:`instancemethod_call()` 的实际C语言实现只是比这个稍微复杂些(有一些类型检查)。
 
 静态方法和类方法
 ----------------
