@@ -8,7 +8,7 @@ Python描述器引导(翻译)
 
 :联系: <python at rcn dot com>
 
-:翻译: hit9
+:翻译: hit9, iceout
 
 :译者注:  原文链接- http://docs.python.org/2/howto/descriptor.html
 
@@ -17,20 +17,20 @@ Python描述器引导(翻译)
 摘要
 ----
 
-定义描述器, 总结协定，并展示描述器怎么被调用的。测试一个普通的描述器和包括方法，属性(property), 静态方法(static method), 类方法在内的几个Python内置描述器。通过给出一个纯Python的等价和应用来展示每个是怎么工作的。
+定义描述器, 总结描述器协议，并展示描述器是怎么被调用的。展示一个自定义的描述器和包括函数，属性(property), 静态方法(static method), 类方法在内的几个Python内置描述器。通过给出一个纯Python的实现和示例应用来展示每个描述器是怎么工作的。
 
-学习描述器不仅让你接触到更多的工具，描述器让我们更深入地了解Python是如何工作的，体现了Python设计的优雅之处。
+学习描述器不仅让你接触到更多的工具，还可以让你更深入地了解Python，让你体会到Python设计的优雅之处。
 
 定义和介绍
 ----------
 
-一般来说，一个描述器是一个有“监听行为”的属性，它的控制被描述器的方法重写。这些方法是 :meth:`__get__`, :meth:`__set__`, 和 :meth:`__delete__`.有这些方法的对象叫做描述器。
+一般来说，一个描述器是一个有“绑定行为”的对象属性，它的访问控制被描述器协议方法重写。这些方法是 :meth:`__get__`, :meth:`__set__`, 和 :meth:`__delete__` 。有这些方法的对象叫做描述器。
 
-默认对属性的控制是从对象的字典里面(__dict__)中获取(get), 设置(set)和删除(delete)它.对于实例 ``a`` 来说， ``a.x``  的查找顺序是, ``a.__dict__['x']`` , 然后 ``type(a).__dict__['x']`` , 然后找 ``type(a)`` 的父类(不包括元类).如果查找到的值是一个描述器, Python就会用描述器的方法来重写默认的控制行为。这个重写发生在这个查找环节的哪里取决于定义了哪个描述器方法。注意, 描述器只有当它是个新式类的实例时才被调用(新式类是继承自 ``type`` 或者 ``object`` 的类) (注：亦即描述器的类应为新式类)
+默认对属性的访问控制是从对象的字典里面(__dict__)中获取(get), 设置(set)和删除(delete)它。对于实例 ``a`` 来说， ``a.x``  的查找顺序是, ``a.__dict__['x']`` , 然后 ``type(a).__dict__['x']`` , 然后找 ``type(a)`` 的父类(不包括元类(metaclass)).如果查找到的值是一个描述器, Python就会调用描述器的方法来重写默认的控制行为。这个重写发生在这个查找环节的哪里取决于定义了哪个描述器方法。注意, 只有在新式类中时描述器才会起作用。(新式类是继承自 ``type`` 或者 ``object`` 的类)
 
-描述器是强大的，应用广泛的。描述器正是属性, 实例方法, 静态方法, 类方法,和 ``super`` 的实现原理.描述器在Python被用于实现Python 2.2中引入的新式类。
+描述器是强大的，应用广泛的。描述器正是属性, 实例方法, 静态方法, 类方法和 ``super`` 的背后的实现机制。描述器在Python自身中广泛使用，以实现Python 2.2中引入的新式类。描述器简化了底层的C代码，并为Python的日常编程提供了一套灵活的新工具。
 
-描述器协定
+描述器协议
 ----------
 
 ``descr.__get__(self, obj, type=None) --> value``
@@ -39,24 +39,26 @@ Python描述器引导(翻译)
 
 ``descr.__delete__(self, obj) --> None``
 
-这是所有描述器方法。一个对象被定义了这些任一个方法就会成为描述器，可以重写默认的查找属性的行为。
+这是所有描述器方法。一个对象具有其中任一个方法就会成为描述器，从而在被当作对象属性时重写默认的查找行为。
 
-如果一个对象同时定义了 :meth:`__get__` 和 :meth:`__set__`,它叫做资料描述器(data descriptor)。仅定义了 :meth:`__get__` 的描述器叫非资料描述器(特别用于方法，当然其他用途也是可能的)
+如果一个对象同时定义了 :meth:`__get__` 和 :meth:`__set__`,它叫做资料描述器(data descriptor)。仅定义了 :meth:`__get__` 的描述器叫非资料描述器(常用于方法，当然其他用途也是可以的)
 
 资料描述器和非资料描述器的区别在于：相对于实例的字典的优先级。如果实例字典中有与描述器同名的属性，如果描述器是资料描述器，优先使用资料描述器，如果是非资料描述器，优先使用字典中的属性。(译者注：这就是为何实例 ``a`` 的方法和属性重名时，比如都叫 ``foo`` Python会在访问 ``a.foo`` 的时候优先访问实例字典中的属性，因为实例函数的实现是个非资料描述器)
 
-要想制作一个只读的资料描述器，需要同时定义 ``__set__`` 和 ``__get__``,并在 ``__set__`` 中引发一个 ``AttributeError`` 异常。
+要想制作一个只读的资料描述器，需要同时定义 ``__set__`` 和 ``__get__``,并在 ``__set__`` 中引发一个 ``AttributeError`` 异常。定义一个引发异常的 ``__set__`` 方法就足够让一个描述器成为资料描述器。
 
 描述器的调用
 ------------
 
 描述器可以直接这么调用：    ``d.__get__(obj)``
 
-然而更多的时候描述器用来拦截对实例属性的访问。举例来说， ``obj.d`` 会在 ``obj`` 的字典中找 ``d`` ,如果 ``d`` 定义了 ``__get__`` 方法，那么 ``d.__get__(obj)`` 会被调用。
+然而更常见的情况是描述器在属性访问时被自动调用。举例来说， ``obj.d`` 会在 ``obj`` 的字典中找 ``d`` ,如果 ``d`` 定义了 ``__get__`` 方法，那么 ``d.__get__(obj)`` 会依据下面的优先规则被调用。
 
-调用的细节取决于 ``obj`` 是一个类还是一个实例。另外，描述器只在它的类是个新式类的时候起作用。继承于 ``object`` 的类叫做新式类。
+调用的细节取决于 ``obj`` 是一个类还是一个实例。另外，描述器只对于新式对象和新式类才起作用。继承于 ``object`` 的类叫做新式类。
 
-对于对象来讲，方法 :meth:`type.__getattribute__` 把 ``B.x`` 变成 ``B.__dict__['x'].__get__(None, B)`` 。用Python来描述就是::
+对于对象来讲，方法 :meth:`object.__getattribute__` 把 ``b.x`` 变成 ``type(b).__dict__['x'].__get__(b, type(b))`` 。具体实现是依据这样的优先顺序：资料描述器优先于实例变量，实例变量优先于非资料描述器，__getattr__()方法(如果对象中包含的话)具有最低的优先级。完整的C语言实现可以在 `Objects/object.c <https://hg.python.org/cpython/file/2.7/Objects/object.c>`_ 中 `PyObject_GenericGetAttr() <https://docs.python.org/2/c-api/object.html#c.PyObject_GenericGetAttr>`_ 查看。
+
+对于类来讲，方法 :meth:`type.__getattribute__` 把 ``B.x`` 变成 ``B.__dict__['x'].__get__(None, B)`` 。用Python来描述就是::
 
     def __getattribute__(self, key):
         "Emulate type_getattro() in Objects/typeobject.c"
@@ -74,21 +76,21 @@ Python描述器引导(翻译)
 * 资料描述器总是比实例字典优先。
 * 非资料描述器可能被实例字典重写。(非资料描述器不如实例字典优先)
 
-``super()`` 返回的对象同样有用来调用描述器的  :meth:`__getattribute__` 方法。调用 ``super(B, obj).m()`` 时会去在 ``obj.__class__.__mro__`` 中查找B的父类,然后返回 ``A.__dict__['m'].__get__(obj, A)`` 。如果没有描述器， 原样返回 ``m`` 。如果连实例字典中都找不到 ``m`` ，继续调用 :meth:`object.__getattribute__`.
+``super()`` 返回的对象同样有一个定制的 :meth:`__getattribute__` 方法用来调用描述器。调用 ``super(B, obj).m()`` 时会先在 ``obj.__class__.__mro__`` 中查找与B紧邻的基类A，然后返回 ``A.__dict__['m'].__get__(obj, A)`` 。如果不是描述器，原样返回 ``m`` 。如果实例字典中找不到 ``m`` ，会回溯继续调用 :meth:`object.__getattribute__` 查找。(译者注：即在 ``__mro__`` 中的下一个基类中查找)
 
 注意:在Python 2.2中，如果 ``m`` 是一个描述器, ``super(B, obj).m()`` 只会调用方法 :meth:`__get__` 。在Python 2.3中，非资料描述器(除非是个旧式类)也会被调用。 :c:func:`super_getattro()` 的实现细节在： 
 `Objects/typeobject.c <http://svn.python.org/view/python/trunk/Objects/typeobject.c?view=markup>`_
-，一个等价的Python实现在 `Guido's Tutorial`_.
+，[del] 一个等价的Python实现在 `Guido's Tutorial`_ [/del] (译者注：原文此句已删除，保留供大家参考)。
 
 .. _`Guido's Tutorial`: http://www.python.org/2.2.3/descrintro.html#cooperation
 
 
-以上展示了描述器的机理是在  :class:`object`, :class:`type`, 和 :func:`super` 的 :meth:`__getattribute__()` 方法中实现的。由 :class:`object` 派生出的类自动的继承这个机理，或者它们有个有类似机理的元类。同样，可以重写类的 :meth:`__getattribute__()` 方法来关闭这个类的描述器行为。
+以上展示了描述器的机理是在  :class:`object`, :class:`type`, 和 :class:`super` 的 :meth:`__getattribute__()` 方法中实现的。由 :class:`object` 派生出的类自动的继承这个机理，或者它们有个有类似机理的元类。同样，可以重写类的 :meth:`__getattribute__()` 方法来关闭这个类的描述器行为。
 
 描述器例子
 ----------
 
-下面的代码中的类中定义了资料描述器，每次 ``get`` 和 ``set`` 都会打印一条消息。重写 :meth:`__getattribute__` 是另一个可以使所有属性拥有这个行为的方法。但是，描述器对于只是几个属性的时候是很有用的。
+下面的代码中定义了一个资料描述器，每次 ``get`` 和 ``set`` 都会打印一条消息。重写 :meth:`__getattribute__` 是另一个可以使所有属性拥有这个行为的方法。但是，描述器在监视特定属性的时候是很有用的。
 
 ::
 
@@ -125,16 +127,16 @@ Python描述器引导(翻译)
     >>> m.y
     5
 
-这个协定非常简单，并且提供了令人激动的可能。一些用例用途太多了以致于它们被打包成独立的方法。像属性(property), 方法(bound和unbound method), 静态方法和类方法都是基于描述器协定的
+这个协议非常简单，并且提供了令人激动的可能。一些用途实在是太普遍以致于它们被打包成独立的函数。像属性(property), 方法(bound和unbound method), 静态方法和类方法都是基于描述器协议的。
 
 属性(properties)
 ----------------
 
-调用 :func:`property` 是建立访问一个属性的描述器的简洁的方式。这个函数的原型::
+调用 :func:`property` 是建立资料描述器的一种简洁方式，从而可以在访问属性时触发相应的方法调用。这个函数的原型::
 
     property(fget=None, fset=None, fdel=None, doc=None) -> property attribute
 
-下面展示了一个典型的定义一个良好管理的属性 ``x`` 的情形::
+下面展示了一个典型应用：定义一个托管属性(Managed Attribute) ``x`` 。 ::
 
     class C(object):
         def getx(self): return self.__x
@@ -170,9 +172,18 @@ Python描述器引导(翻译)
                 raise AttributeError, "can't delete attribute"
             self.fdel(obj)
 
-内建函数 :func:`property` 提供了属性访问的接口，之后的改变需要我们去介入一个函数。
+        def getter(self, fget):
+            return type(self)(fget, self.fset, self.fdel, self.__doc__)
 
-例如，一个电子表格类可能提供了访问单元格的值的方式: ``Cell('b10').value``. 对这个程序随后的改善需要重新计算每个访问的控制。然而，程序员并不想影响已经写的那些直接访问这个属性的代码。那么来包装这个访问控制的方法就是用property资料描述器::
+        def setter(self, fset):
+            return type(self)(self.fget, fset, self.fdel, self.__doc__)
+
+        def deleter(self, fdel):
+            return type(self)(self.fget, self.fset, fdel, self.__doc__)
+
+当用户接口已经被授权访问属性之后，需求发生一些变化，属性需要进一步处理才能返回给用户。这时 :func:`property` 能够提供很大帮助。
+
+例如，一个电子表格类提供了访问单元格的方式: ``Cell('b10').value`` 。 之后，对这个程序的改善要求在每次访问单元格时重新计算单元格的值。然而，程序员并不想影响那些客户端中直接访问属性的代码。那么解决方案是将属性访问包装在一个属性资料描述器中::
 
     class Cell(object):
         . . .
@@ -185,11 +196,11 @@ Python描述器引导(翻译)
 函数和方法
 ----------
 
-Python的面向对象特征建立于函数环境, 非资料描述器把两者无缝地连接起来。
+Python的面向对象特征是建立在基于函数的环境之上的。非资料描述器把两者无缝地连接起来。
 
-类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。唯一和一般的函数不同之处是第一个参数为对象实例保留。Python约定，这个参数通常是 *self*, 但也可能叫 *this* ，或者其它什么变量名字吧。
+类的字典把方法当做函数存储。在定义类的时候，方法通常用关键字 :keyword:`def` 和 :keyword:`lambda` 来声明。这和创建函数是一样的。唯一的不同之处是类方法的第一个参数用来表示对象实例。Python约定，这个参数通常是 *self*, 但也可以叫 *this* 或者其它任何名字。
 
-为了支持方法调用，函数包含一个 :meth:`__get__` 方法来控制属性访问。这就是说所有的方法都是非资料描述器，它们返回有界还是无界的方法取决于他们是被类调用的还是被实例调用的。用Python来说就是::
+为了支持方法调用，函数包含一个 :meth:`__get__` 方法以便在属性访问时绑定方法。这就是说所有的函数都是非资料描述器，它们返回绑定(bound)还是非绑定(unbound)的方法取决于他们是被实例调用还是被类调用。用Python代码来描述就是::
 
     class Function(object):
         . . .
@@ -197,9 +208,7 @@ Python的面向对象特征建立于函数环境, 非资料描述器把两者无
             "Simulate func_descr_get() in Objects/funcobject.c"
             return types.MethodType(self, obj, objtype)
 
-在Python解释器里面来看:
-
-::
+下面运行解释器来展示实际情况下函数描述器是如何工作的::
 
     >>> class D(object):
          def f(self, x):
@@ -213,20 +222,20 @@ Python的面向对象特征建立于函数环境, 非资料描述器把两者无
     >>> d.f             # 从实例来访问，返回bound method
     <bound method D.f of <__main__.D object at 0x00B18C90>>
 
-从输出来看，bound method 和unbound method是两个不同的类型.然而它们是这么实现的：在文件  
+从输出来看，绑定方法和非绑定方法是两个不同的类型。它们是在文件  
 Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobject.c?view=markup)  
-中用C实现的 :c:type:`PyMethod_Type`  是一个对象，但是根据 :attr:`im_self` 是否是 *NULL* (在C中等价于 *None* ) 分成两个不同的陈述。
+中用C实现的， :c:type:`PyMethod_Type`  是一个对象，但是根据 :attr:`im_self` 是否是 *NULL* (在C中等价于 *None* ) 而表现不同。
 
-同样，调用方法的结果依赖于 :attr:`im_self` 是否设置。如果设置了(意味着bound), 原来的函数(保存在 :attr:`im_func` 中)被调用，并且第一个参数设置成实例。如果unbound, 所有参数不变地传给那个函数。真实函数 :func:`instancemethod_call()` 的C的实现比这个稍微复杂些而已(有一些类型检查)。
+同样，一个方法的表现依赖于 :attr:`im_self` 。如果设置了(意味着bound), 原来的函数(保存在 :attr:`im_func` 中)被调用，并且第一个参数设置成实例。如果unbound, 所有参数原封不动地传给原来的函数。函数 :func:`instancemethod_call()` 的实际C语言实现只是比这个稍微复杂些(有一些类型检查)。
 
 静态方法和类方法
 ----------------
 
-非资料描述器提供了一个简单的把函数绑定成一个实例的方法的通常模式。
+非资料描述器为将函数绑定成方法这种常见模式提供了一个简单的实现机制。
 
-简而言之，函数有个方法 :meth:`__get__` 的时候就会变成一个实例方法。非资料描述器把 ``obj.f(*args)`` 的调用 变成 ``f(obj, *args)``. 调用 ``klass.f(*args)`` 就相当于调用 ``f(*args)``.
+简而言之，函数有个方法 :meth:`__get__` ，当函数被当作属性访问时，它就会把函数变成一个实例方法。非资料描述器把 ``obj.f(*args)`` 的调用转换成 ``f(obj, *args)`` 。 调用 ``klass.f(*args)`` 就变成调用 ``f(*args)`` 。
 
-下面的表格总结了这个绑定和它的两个最有用的变种:
+下面的表格总结了绑定和它最有用的两个变种:
 
       +-----------------+----------------------+------------------+
       | Transformation  | Called from an       | Called from a    |
@@ -239,15 +248,14 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
       | classmethod     | f(type(obj), \*args) | f(klass, \*args) |
       +-----------------+----------------------+------------------+
 
-静态方法原样返回那个函数，调用 ``c.f`` 或者 ``C.f`` 都是等价的，都是在调用 ``object.__getattribute__(c, "f")`` 或者 ``object.__getattribute__(C, "f")`` 。就是说，这个函数可以同时用类和实例去访问。
+静态方法原样返回函数，调用 ``c.f`` 或者 ``C.f`` 分别等价于 ``object.__getattribute__(c, "f")`` 或者 ``object.__getattribute__(C, "f")`` 。也就是说，无论是从一个对象还是一个类中，这个函数都会同样地访问到。
 
-那些不需要 ``self`` 变量做参数的函数适合用做静态方法。
+那些不需要 ``self`` 变量的方法适合用做静态方法。
 
-例如, 一个用做统计的包(pkg)可能包含一个类用做实验数据的容器。这个类提供了一般的计算平均数据的方法
-, 平均数，中位数，和其他依赖于这些数据的描述性统计。然而，可能会有些有用的函数和这个统计主题相关，但是并不依赖于这些实验的数据。比如 ``erf(x)`` 是遇到统计工作经常用到的一个函数，但它并不依赖于那些特定的数据。它可以从类或者实例调用: ``s.erf(1.5) --> .9332``  或者 ``Sample.erf(1.5) --> .9332``.
+例如, 一个统计包可能包含一个用来做实验数据容器的类。这个类提供了一般的方法，来计算平均数，中位数，以及其他基于数据的描述性统计指标。然而，这个类可能包含一些概念上与统计相关但不依赖具体数据的函数。比如 ``erf(x)`` 就是一个统计工作中经常用到的，但却不依赖于特定数据的函数。它可以从类或者实例调用: ``s.erf(1.5) --> .9332``  或者 ``Sample.erf(1.5) --> .9332``.
 
 
-既然静态方法是原封不动的被调用，下面的代码看上去就没什么意思了:) ::
+既然staticmethod将函数原封不动的返回，那下面的代码看上去就很正常了::
 
     >>> class E(object):
          def f(x):
@@ -259,7 +267,7 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
     >>> print E().f(3)
     3
 
-利用非资料描述器，我们用Python来实现 :func:`staticmethod` ::
+利用非资料描述器， :func:`staticmethod` 的纯Python版本看起来像这样::
 
     class StaticMethod(object):
      "Emulate PyStaticMethod_Type() in Objects/funcobject.c"
@@ -270,9 +278,7 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
      def __get__(self, obj, objtype=None):
           return self.f
 
-不像静态方法，类方法需要在调用这个函数之前在参数列表前添上class的引用作为第一个参数。这个格式不管是对实例调用的情形还是类调用的情形都一样:
-
-::
+不像静态方法，类方法需要在调用函数之前会在参数列表前添上class的引用作为第一个参数。不管调用者是对象还是类，这个格式是一样的::
 
     >>> class E(object):
          def f(klass, x):
@@ -284,7 +290,7 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
     >>> print E().f(3)
     ('E', 3)
 
-当一个函数不需要相关的数据做参数而之需要一个类的引用的时候，这个特征就显得必要了。一个用途就是用来创建一个类的构造器。在Python 2.3中, :func:`dict.fromkeys` 可以用键的列表来创建一个新的字典。等价的Python实现就是 ::
+当一个函数不需要相关的数据做参数而只需要一个类的引用的时候，这个特征就显得很有用了。类方法的一个用途是用来创建不同的类构造器。在Python 2.3中, :func:`dict.fromkeys` 可以依据一个key列表来创建一个新的字典。等价的Python实现就是::
 
     class Dict:
         . . .
@@ -296,12 +302,12 @@ Objects/classobject.c(http://svn.python.org/view/python/trunk/Objects/classobjec
             return d
         fromkeys = classmethod(fromkeys)
 
-这样，一个新的字典就可以这么创建::
+现在，一个新的字典就可以这么创建::
 
     >>> Dict.fromkeys('abracadabra')
     {'a': None, 'r': None, 'b': None, 'c': None, 'd': None}
 
-用非资料描述器来给出 :func:`classmethod` 的一个Python实现::
+用非资料描述器协议， :func:`classmethod` 的纯Python版本实现看起来像这样::
 
     class ClassMethod(object):
          "Emulate PyClassMethod_Type() in Objects/funcobject.c"
