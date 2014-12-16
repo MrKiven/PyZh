@@ -121,6 +121,44 @@ https://github.com/coleifer/peewee
     for post, user in (Post & User).select().fetchall():
         print "Author: %s, PostName: %s" % (user.name, post.name)
 
+
+Pony ORM
+--------
+
+https://github.com/ponyorm/pony
+
+一个十分独特的ORM，接口简单干净，最大的特点是支持使用generator的语法来进行查询，可以使查询语句变得简洁，灵活，而且漂亮。
+
+例如可以使用如下的语句来进行一个查询::
+
+    select(p for p in Product if p.name.startswith('A') and p.cost <= 1000)
+
+同时，Pony ORM还提供了一个ER图编辑工具来进行数据库原型设计。
+
+Spyne
+-----
+
+https://github.com/arskom/spyne
+
+一个用于构建RPC服务的工具集，支持SOAP，JSON，XML等多种流行的协议。
+
+现在有诸如 flask-restful 以及 django-rest-framework 等框架用于 REST 服务的开发，人们对于 REST 之外的框架似乎兴趣不大。Spyne 很好地填补了这一空白，它支持多种协议，而且本身也封装地相当好::
+
+    class HelloWorldService(ServiceBase):
+        @srpc(Unicode, Integer, _returns=Iterable(Unicode))
+        def say_hello(name, times):
+            for i in range(times):
+                yield 'Hello, %s' % name
+            
+    application = Application([HelloWorldService],
+        tns='spyne.examples.hello',
+        in_protocol=Soap11(validator='lxml'),
+        out_protocol=Soap11()
+    )
+    
+
+短短几行代码便实现了一个支持SOAP 1.1 协议的服务器端application，接入任何一个WSGI兼容的服务器后端就可以运行了。
+
 schema
 ------
 
