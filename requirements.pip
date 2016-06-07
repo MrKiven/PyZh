@@ -3,7 +3,7 @@ Jinja2==2.6
 Pygments==1.6
 Sphinx==1.2b1
 docutils==0.10
--e git://github.com/veselosky/sphinx-feed.git@0acfe8c73c0fbc5d889ba8cc2ee8f135b6ca673c#egg=feed-dev
+-e git://github.com/whardier/sphinx-feed.git#egg=feed-dev
 html5lib==0.95
 python-dateutil==2.1
 six==1.3.0
