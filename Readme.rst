@@ -32,7 +32,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
       cd PyZh
       git submodule init & git submodule update
       virtualenv venv
-      source <env-path>/bin/activate 
+      source <env-path>/bin/activate
       pip install -r requirements.pip
 
 2. 编写文章::
@@ -41,8 +41,7 @@ Online: https://pyzh.readthedocs.org/en/latest/
 
 3. 编译预览::
 
-      cd docs
-      make html
+      make doc
       cd _build/html
       python -m SimpleHTTPServer
 
