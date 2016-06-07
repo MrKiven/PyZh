@@ -25,7 +25,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinxcontrib.feed']
+#extensions = ['sphinxcontrib.feed']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -244,9 +244,9 @@ texinfo_documents = [
 html_title = u"一起写Python文章，一起看Python文章"
 
 # the feed based url
-feed_base_url = "https://pyzh.readthedocs.org/en/latest"
+#feed_base_url = "https://pyzh.readthedocs.org/en/latest"
 
-feed_filename = 'rss.xml'
+#feed_filename = 'rss.xml'
 
 sys.path.append(os.path.abspath('_themes'))
 html_theme_path = ['_themes']
