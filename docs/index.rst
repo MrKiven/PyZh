@@ -30,3 +30,4 @@ PyZh
     python-magic-methods-guide
     python-setup-dot-py-vs-requirements-dot-txt
     python-realtime
+    python-pandas
